@@ -1,4 +1,4 @@
-package com.cs.ecommerce.inventoryservice.dto;
+package com.cs.ecommerce.sharedmodules.dto.inventory;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

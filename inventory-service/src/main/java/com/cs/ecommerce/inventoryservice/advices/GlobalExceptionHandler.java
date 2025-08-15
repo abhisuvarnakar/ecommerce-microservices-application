@@ -1,9 +1,9 @@
 package com.cs.ecommerce.inventoryservice.advices;
 
-import com.cs.ecommerce.inventoryservice.exceptions.InsufficientStockException;
-import com.cs.ecommerce.inventoryservice.exceptions.InventoryNotFoundException;
 import com.cs.ecommerce.inventoryservice.exceptions.ReservationNotFoundException;
 import com.cs.ecommerce.sharedmodules.dto.ApiResponse;
+import com.cs.ecommerce.sharedmodules.exceptions.InsufficientStockException;
+import com.cs.ecommerce.sharedmodules.exceptions.InventoryNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.cs.ecommerce.productservice.dto;
+package com.cs.ecommerce.sharedmodules.dto.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductDTO {
-
     private Long productId;
     private String name;
     private String description;

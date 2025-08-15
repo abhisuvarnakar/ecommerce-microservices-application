@@ -1,4 +1,4 @@
-package com.cs.ecommerce.inventoryservice.exceptions;
+package com.cs.ecommerce.sharedmodules.exceptions;
 
 public class InventoryNotFoundException extends RuntimeException {
 

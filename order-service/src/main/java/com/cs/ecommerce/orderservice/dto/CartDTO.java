@@ -5,14 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderResponseDTO {
-    private Long orderId;
-    private String orderNumber;
+public class CartDTO {
+    private Long userId;
+    private List<CartItemDTO> items;
     private BigDecimal totalAmount;
-    private LocalDate estimatedDelivery;
+    private int itemCount;
 }

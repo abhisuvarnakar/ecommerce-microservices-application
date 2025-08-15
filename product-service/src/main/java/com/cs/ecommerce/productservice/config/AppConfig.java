@@ -2,10 +2,10 @@ package com.cs.ecommerce.productservice.config;
 
 import com.cs.ecommerce.productservice.dto.CategoryCreateRequestDTO;
 import com.cs.ecommerce.productservice.dto.CategoryDTO;
-import com.cs.ecommerce.productservice.dto.ProductDTO;
 import com.cs.ecommerce.productservice.dto.ProductRequestDTO;
 import com.cs.ecommerce.productservice.entities.Category;
 import com.cs.ecommerce.productservice.entities.Product;
+import com.cs.ecommerce.sharedmodules.dto.product.ProductDTO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;

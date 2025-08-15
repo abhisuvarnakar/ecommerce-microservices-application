@@ -20,4 +20,6 @@ public interface StockReservationRepository extends JpaRepository<StockReservati
             "AND sr.status = :status")
     List<StockReservation> findByProductIdAndStatus
             (@Param("productId") Long productId, @Param("status") StockReservationStatus status);
+
+    List<StockReservation> findByOrderId(Long orderId);
 }

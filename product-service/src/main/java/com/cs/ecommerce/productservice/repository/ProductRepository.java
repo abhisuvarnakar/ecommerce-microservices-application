@@ -50,4 +50,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsBySkuAndIdNot(String sku, Long id);
 
     boolean existsBySku(String sku);
+
+    List<Product> findByIdInAndIsActiveTrue(List<Long> ids);
 }

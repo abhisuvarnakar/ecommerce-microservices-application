@@ -1,18 +1,18 @@
 package com.cs.ecommerce.orderservice.dto;
 
-import com.cs.ecommerce.orderservice.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderStatusResponseDTO {
-    private OrderStatus currentStatus;
-    private List<OrderStatusHistoryResponseDTO> statusHistory;
+public class OrderResponseDTO {
+    private Long orderId;
+    private String orderNumber;
+    private BigDecimal totalAmount;
     private LocalDate estimatedDelivery;
-    private String trackingNumber;
 }

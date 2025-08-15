@@ -1,6 +1,5 @@
 package com.cs.ecommerce.productservice.service.impl;
 
-import com.cs.ecommerce.productservice.dto.ProductDTO;
 import com.cs.ecommerce.productservice.dto.ProductRequestDTO;
 import com.cs.ecommerce.productservice.dto.SearchResponseDTO;
 import com.cs.ecommerce.productservice.entities.Category;
@@ -8,7 +7,10 @@ import com.cs.ecommerce.productservice.entities.Product;
 import com.cs.ecommerce.productservice.repository.CategoryRepository;
 import com.cs.ecommerce.productservice.repository.ProductRepository;
 import com.cs.ecommerce.productservice.service.ProductService;
+import com.cs.ecommerce.productservice.util.Utils;
 import com.cs.ecommerce.sharedmodules.dto.PaginatedResponse;
+import com.cs.ecommerce.sharedmodules.dto.product.ProductDTO;
+import com.cs.ecommerce.sharedmodules.exceptions.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +55,26 @@ public class ProductSeviceImpl implements ProductService {
         Product product = productRepository.findByIdAndIsActiveTrue(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
         return convertToDTO(product);
+    }
+
+    @Override
+    public List<ProductDTO> getProductsByIds(List<Long> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Product> productList = new ArrayList<>();
+        List<List<Long>> lists = Utils.partitionList(productIds, 100);
+
+        lists.forEach(l -> {
+            List<Product> products = productRepository.findByIdInAndIsActiveTrue(l);
+            if (!products.isEmpty()) {
+                productList.addAll(products);
+            }
+        });
+        if (productList.isEmpty()) {
+            throw new ProductNotFoundException("Product(s) not found.");
+        }
+        return productList.stream().map(this::convertToDTO).toList();
     }
 
     @Override

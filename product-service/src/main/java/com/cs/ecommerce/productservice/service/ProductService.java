@@ -1,9 +1,9 @@
 package com.cs.ecommerce.productservice.service;
 
-import com.cs.ecommerce.productservice.dto.ProductDTO;
 import com.cs.ecommerce.productservice.dto.ProductRequestDTO;
 import com.cs.ecommerce.productservice.dto.SearchResponseDTO;
 import com.cs.ecommerce.sharedmodules.dto.PaginatedResponse;
+import com.cs.ecommerce.sharedmodules.dto.product.ProductDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,6 +15,8 @@ public interface ProductService {
                                               String sortBy, String keyword);
 
     ProductDTO getProductById(Long productId);
+
+    List<ProductDTO> getProductsByIds(List<Long> productIds);
 
     ProductDTO createProduct(ProductRequestDTO request);
 

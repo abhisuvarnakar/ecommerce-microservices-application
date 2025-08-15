@@ -1,12 +1,13 @@
 package com.cs.ecommerce.productservice.controller;
 
 import com.cs.ecommerce.productservice.annotation.RequireRole;
-import com.cs.ecommerce.productservice.dto.ProductDTO;
 import com.cs.ecommerce.productservice.dto.ProductRequestDTO;
 import com.cs.ecommerce.productservice.dto.SearchResponseDTO;
 import com.cs.ecommerce.productservice.service.ProductService;
 import com.cs.ecommerce.sharedmodules.dto.ApiResponse;
 import com.cs.ecommerce.sharedmodules.dto.PaginatedResponse;
+import com.cs.ecommerce.sharedmodules.dto.product.ProductBatchRequestDTO;
+import com.cs.ecommerce.sharedmodules.dto.product.ProductDTO;
 import com.cs.ecommerce.sharedmodules.enums.Role;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -94,14 +95,25 @@ public class ProductController {
 
         SearchResponseDTO searchResult = productService.searchProducts(
                 keyword, category, minPrice, maxPrice, page, size);
-        return ResponseEntity.ok(ApiResponse.success(searchResult, "Search completed successfully"));
+        return ResponseEntity.ok(ApiResponse.success(searchResult, "Search completed " +
+                "successfully"));
     }
 
     @GetMapping("/suggestions")
     public ResponseEntity<ApiResponse<List<String>>> getProductSuggestions(
             @RequestParam(name = "keyword") @NotBlank String keyword) {
         List<String> suggestions = productService.getProductSuggestions(keyword);
-        return ResponseEntity.ok(ApiResponse.success(suggestions, "Suggestions retrieved successfully"));
+        return ResponseEntity.ok(ApiResponse.success(suggestions, "Suggestions retrieved " +
+                "successfully"));
+    }
+
+    @PostMapping("/batchProduct")
+    ResponseEntity<ApiResponse<List<ProductDTO>>> getProductsByIds(
+            @RequestBody ProductBatchRequestDTO productBatchRequestDTO) {
+        List<ProductDTO> productDTOList =
+                productService.getProductsByIds(productBatchRequestDTO.getProductIds());
+        return ResponseEntity.ok(ApiResponse.success(productDTOList, "Products retrieved " +
+                "successfully"));
     }
 
 }

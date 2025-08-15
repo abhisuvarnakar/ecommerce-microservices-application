@@ -6,13 +6,16 @@ import com.cs.ecommerce.inventoryservice.entities.StockMovement;
 import com.cs.ecommerce.inventoryservice.entities.StockReservation;
 import com.cs.ecommerce.inventoryservice.enums.StockMovementType;
 import com.cs.ecommerce.inventoryservice.enums.StockReservationStatus;
-import com.cs.ecommerce.inventoryservice.exceptions.InsufficientStockException;
-import com.cs.ecommerce.inventoryservice.exceptions.InventoryNotFoundException;
 import com.cs.ecommerce.inventoryservice.exceptions.ReservationNotFoundException;
 import com.cs.ecommerce.inventoryservice.repository.InventoryRepository;
 import com.cs.ecommerce.inventoryservice.repository.StockMovementRepository;
 import com.cs.ecommerce.inventoryservice.repository.StockReservationRepository;
 import com.cs.ecommerce.inventoryservice.service.InventoryService;
+import com.cs.ecommerce.sharedmodules.dto.inventory.InventoryResponseDTO;
+import com.cs.ecommerce.sharedmodules.dto.inventory.ReserveStockRequestDTO;
+import com.cs.ecommerce.sharedmodules.dto.inventory.ReserveStockResponseDTO;
+import com.cs.ecommerce.sharedmodules.exceptions.InsufficientStockException;
+import com.cs.ecommerce.sharedmodules.exceptions.InventoryNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -223,6 +226,22 @@ public class InventoryServiceImpl implements InventoryService {
 
         return new StockAdjustmentResponseDTO(savedMovement.getId(),
                 "Stock adjustment recorded successfully");
+    }
+
+    @Override
+    public List<ReserveStockResponseDTO> bulkReserveStock(Long userId, List<ReserveStockRequestDTO> requests) {
+        return requests.stream()
+                .map(stock -> reserveStock(userId, stock))
+                .toList();
+    }
+
+    @Override
+    public String releaseStockFromOrder(Long userId, Long orderId) {
+        List<StockReservation> reservations = stockReservationRepository.findByOrderId(orderId);
+        reservations.forEach(r -> {
+            releaseStock(userId, r.getId());
+        });
+        return "Stock released successfully";
     }
 
     private Inventory getInventoryByProductId(Long productId) {

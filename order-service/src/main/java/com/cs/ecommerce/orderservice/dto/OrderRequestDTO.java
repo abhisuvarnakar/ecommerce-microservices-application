@@ -7,17 +7,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderRequestDTO {
+public class OrderRequestDTO {
 
-    @NotNull(message = "Shipping address is required")
-    private Long shippingAddress;
+    @NotNull
+    private Long addressId;
 
-    @NotBlank(message = "Payment method is required")
+    @NotBlank
     private String paymentMethod;
 
-    @NotEmpty(message = "Cart items are required")
-    private List<OrderItemRequestDTO> cartItems;
+    @NotEmpty
+    private List<CartItemDTO> cartItems;
 }

@@ -3,6 +3,7 @@ package com.cs.ecommerce.orderservice.entities;
 import com.cs.ecommerce.orderservice.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class OrderStatusHistory {
 
     @Id
@@ -24,7 +26,6 @@ public class OrderStatusHistory {
     private Order order;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private OrderStatus oldStatus;
 
     @Enumerated(EnumType.STRING)

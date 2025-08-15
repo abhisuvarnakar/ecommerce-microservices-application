@@ -3,6 +3,9 @@ package com.cs.ecommerce.inventoryservice.controller;
 import com.cs.ecommerce.inventoryservice.dto.*;
 import com.cs.ecommerce.inventoryservice.service.InventoryService;
 import com.cs.ecommerce.sharedmodules.dto.ApiResponse;
+import com.cs.ecommerce.sharedmodules.dto.inventory.InventoryResponseDTO;
+import com.cs.ecommerce.sharedmodules.dto.inventory.ReserveStockRequestDTO;
+import com.cs.ecommerce.sharedmodules.dto.inventory.ReserveStockResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,11 +51,29 @@ public class InventoryController {
                 "Stock reserved successfully"));
     }
 
+    @PostMapping("/bulk-reserve")
+    ResponseEntity<ApiResponse<List<ReserveStockResponseDTO>>> bulkReserveStock(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestBody List<ReserveStockRequestDTO> requests) {
+        List<ReserveStockResponseDTO> response = inventoryService.bulkReserveStock(userId,
+                requests);
+        return ResponseEntity.ok(ApiResponse.success(response, "All Stocks reserved successfully"));
+    }
+
     @PostMapping("/release/{reservationId}")
     public ResponseEntity<ApiResponse<String>> releaseStock(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable("reservationId") Long reservationId) {
         String response = inventoryService.releaseStock(userId, reservationId);
+        return ResponseEntity.ok(ApiResponse.success(response,
+                "Stock released successfully"));
+    }
+
+    @PostMapping("/release/order/{orderId}")
+    public ResponseEntity<ApiResponse<String>> releaseStockFromOrder(
+            @RequestHeader("X-User-Id") Long userId,
+            @PathVariable("orderId") Long orderId) {
+        String response = inventoryService.releaseStockFromOrder(userId, orderId);
         return ResponseEntity.ok(ApiResponse.success(response,
                 "Stock released successfully"));
     }
