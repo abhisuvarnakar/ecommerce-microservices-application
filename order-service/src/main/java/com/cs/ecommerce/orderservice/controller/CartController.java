@@ -30,8 +30,9 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartDTO>> addItemToCart(@RequestHeader("X-User-Id") Long userId,
                                                               @Valid @RequestBody AddCartItemDTO request) {
         log.debug("Received request to add item to cart for user: {}", userId);
-        CartDTO cart = cartService.addItemToCart(userId, request);
-        return ResponseEntity.ok(ApiResponse.success(cart, "Item added to cart successfully"));
+        cartService.addItemToCart(userId, request);
+        return ResponseEntity.ok(ApiResponse.success(cartService.getCart(userId), "Item added to " +
+                "cart successfully"));
     }
 
     @PutMapping("/{itemId}/update")

@@ -53,7 +53,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartDTO addItemToCart(Long userId, AddCartItemDTO request) {
+    public void addItemToCart(Long userId, AddCartItemDTO request) {
         log.info("Adding item to cart for user: {}, product: {}, quantity: {}",
                 userId, request.getProductId(), request.getQuantity());
 
@@ -70,8 +70,6 @@ public class CartServiceImpl implements CartService {
         } else {
             createNewCartItem(cart, request, product);
         }
-
-        return mapToCartDTO(cart);
     }
 
     @Override
@@ -155,7 +153,6 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartDTO mapToCartDTO(Cart cart) {
-        //List<CartItem> items = cartItemRepository.findByCartUserId(cart.getUserId());
         List<CartItem> items = cart.getItems();
         BigDecimal totalAmount = items.stream()
                 .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))

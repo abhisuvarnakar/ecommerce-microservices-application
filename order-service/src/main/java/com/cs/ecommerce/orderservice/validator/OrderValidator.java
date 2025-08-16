@@ -1,10 +1,9 @@
-package com.cs.ecommerce.orderservice.service.impl;
+package com.cs.ecommerce.orderservice.validator;
 
 import com.cs.ecommerce.orderservice.clients.InventoryServiceClient;
 import com.cs.ecommerce.orderservice.clients.ProductServiceClient;
 import com.cs.ecommerce.orderservice.dto.CartItemDTO;
 import com.cs.ecommerce.orderservice.dto.OrderRequestDTO;
-import com.cs.ecommerce.orderservice.service.OrderValidatorService;
 import com.cs.ecommerce.sharedmodules.dto.ApiResponse;
 import com.cs.ecommerce.sharedmodules.dto.inventory.InventoryResponseDTO;
 import com.cs.ecommerce.sharedmodules.dto.product.ProductBatchRequestDTO;
@@ -16,7 +15,7 @@ import com.cs.ecommerce.sharedmodules.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,14 +23,13 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class OrderValidatorServiceImpl implements OrderValidatorService {
+public class OrderValidator {
 
     private final ProductServiceClient productServiceClient;
     public final InventoryServiceClient inventoryServiceClient;
 
-    @Override
     public void validateOrderRequest(OrderRequestDTO request) {
         if (request.getAddressId() == null) {
             throw new BusinessException("Shipping address is required");
@@ -41,7 +39,6 @@ public class OrderValidatorServiceImpl implements OrderValidatorService {
         }
     }
 
-    @Override
     public Map<Long, ProductDTO> validateProducts(List<CartItemDTO> cartItems) {
         List<Long> productIds = cartItems.stream()
                 .map(CartItemDTO::getProductId)
@@ -71,7 +68,6 @@ public class OrderValidatorServiceImpl implements OrderValidatorService {
                 Function.identity()));
     }
 
-    @Override
     public void validateInventory(Map<Long, ProductDTO> products, List<CartItemDTO> cartItems) {
         Map<Long, Integer> requestedQuantities = new HashMap<>();
 

@@ -1,6 +1,7 @@
 package com.cs.ecommerce.orderservice.service.impl;
 
 import com.cs.ecommerce.orderservice.clients.InventoryServiceClient;
+import com.cs.ecommerce.orderservice.clients.PaymentServiceClient;
 import com.cs.ecommerce.orderservice.clients.ProductServiceClient;
 import com.cs.ecommerce.orderservice.dto.*;
 import com.cs.ecommerce.orderservice.entities.Order;
@@ -14,16 +15,19 @@ import com.cs.ecommerce.orderservice.repository.OrderRepository;
 import com.cs.ecommerce.orderservice.repository.OrderStatusHistoryRepository;
 import com.cs.ecommerce.orderservice.service.CartService;
 import com.cs.ecommerce.orderservice.service.OrderService;
-import com.cs.ecommerce.orderservice.service.OrderValidatorService;
 import com.cs.ecommerce.orderservice.util.OrderCalculator;
 import com.cs.ecommerce.orderservice.util.OrderNumberGenerator;
+import com.cs.ecommerce.orderservice.validator.OrderValidator;
 import com.cs.ecommerce.sharedmodules.dto.ApiResponse;
 import com.cs.ecommerce.sharedmodules.dto.Pagination;
 import com.cs.ecommerce.sharedmodules.dto.inventory.ReserveStockRequestDTO;
 import com.cs.ecommerce.sharedmodules.dto.inventory.ReserveStockResponseDTO;
 import com.cs.ecommerce.sharedmodules.dto.product.ProductDTO;
+import com.cs.ecommerce.sharedmodules.enums.ApiStatus;
 import com.cs.ecommerce.sharedmodules.exceptions.BusinessException;
+import com.cs.ecommerce.sharedmodules.exceptions.ResourceNotFoundException;
 import com.cs.ecommerce.sharedmodules.exceptions.ServiceException;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -39,13 +43,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class OrderServiceImpl implements OrderService {
 
@@ -55,11 +59,22 @@ public class OrderServiceImpl implements OrderService {
     private final CartService cartService;
     private final ProductServiceClient productServiceClient;
     private final InventoryServiceClient inventoryServiceClient;
-    private final OrderValidatorService orderValidator;
+    private final PaymentServiceClient paymentServiceClient;
+    private final OrderValidator orderValidator;
     private final ModelMapper modelMapper;
 
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO request, Long userId) {
+        Order order = createAndSaveorder(request, userId);
+        processPayment(order.getId(), order.getTotalAmount(), request.getPaymentMethod(), userId);
+
+        // TODO: Publish OrderCreated event to Kafka
+
+        return mapToOrderResponseDTO(order);
+    }
+
+    @Transactional
+    private Order createAndSaveorder(OrderRequestDTO request, Long userId) {
         log.info("Creating order for user: {}", userId);
         orderValidator.validateOrderRequest(request);
         Map<Long, ProductDTO> products = orderValidator.validateProducts(request.getCartItems());
@@ -93,10 +108,7 @@ public class OrderServiceImpl implements OrderService {
 
         reserveInventory(userId, savedOrder.getId(), request.getCartItems());
 
-        // TODO: Publish OrderCreated event to Kafka
-
-        cartService.clearCart(userId);
-        return mapToOrderResponseDTO(savedOrder);
+        return savedOrder;
     }
 
     @Override
@@ -157,6 +169,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public String cancelOrder(Long userId, Long orderId) {
         log.info("Cancelling order: {} for user: {}", orderId, userId);
         Order order = orderRepository.findByIdAndUserId(orderId, userId)
@@ -174,12 +187,14 @@ public class OrderServiceImpl implements OrderService {
         releaseInventory(userId, orderId);
 
         // TODO: Publish OrderCancelled event to Kafka
-        // TODO: Process refund if payment was made
+
+        processRefund(orderId, order.getTotalAmount(), "Dummy reason for cancelling order", userId);
 
         return "Order cancelled successfully";
     }
 
     @Override
+    @Transactional
     public String updateOrderStatus(Long orderId, OrderStatus status, String trackingNumber) {
         log.info("Updating order: {} to status: {}", orderId, status);
         Order order = orderRepository.findById(orderId)
@@ -247,10 +262,45 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void releaseInventory(Long userId, Long orderId) {
-        ResponseEntity<ApiResponse<String>> response = inventoryServiceClient.releaseStockFromOrder(userId
-                , orderId);
+        ResponseEntity<ApiResponse<String>> response =
+                inventoryServiceClient.releaseStockFromOrder(userId
+                        , orderId);
         if (response.getStatusCode() != HttpStatus.OK) {
             log.error("Failed to release inventory for order: {}", orderId);
+        }
+    }
+
+    private void processPayment(Long orderId, BigDecimal totalAmount, String paymentMethod,
+                                Long userId) {
+        Map<String, Object> request = Map.of("orderId", orderId,
+                "amount", totalAmount,
+                "paymentMethod", paymentMethod);
+        ApiResponse<Map<String, Object>> response = paymentServiceClient.processPayment(request,
+                userId);
+
+        if (!ApiStatus.SUCCESS.equals(response.getStatus())) {
+            throw new ServiceException("Processing of payment got failed");
+        }
+    }
+
+    private void processRefund(Long orderId, BigDecimal totalAmount, String reason, Long userId) {
+        ApiResponse<List<Map<String, Object>>> paymentResponse =
+                paymentServiceClient.getPaymentsForOrder(orderId);
+        if (!ApiStatus.SUCCESS.equals(paymentResponse.getStatus())) {
+            throw new ResourceNotFoundException("Payment details not found for orderId: " + orderId);
+        }
+
+        List<Map<String, Object>> paymentData = paymentResponse.getData();
+        for (Map<String, Object> payment : paymentData) {
+            Long paymentId = ((Number) payment.get("paymentId")).longValue();
+            BigDecimal amount = new BigDecimal(payment.get("amount").toString());
+            Map<String, Object> request = Map.of("amount", amount,
+                    "reason", reason);
+            ApiResponse<Map<String, Object>> response =
+                    paymentServiceClient.processRefund(paymentId, request, userId);
+            if (!ApiStatus.SUCCESS.equals(response.getStatus())) {
+                throw new ServiceException("Refund of payment got failed");
+            }
         }
     }
 

@@ -8,7 +8,7 @@ public interface CartService {
 
     CartDTO getCart(Long userId);
 
-    CartDTO addItemToCart(Long userId, AddCartItemDTO request);
+    void addItemToCart(Long userId, AddCartItemDTO request);
 
     CartDTO updateCartItem(Long userId, Long itemId, UpdateCartItemDTO request);
 
