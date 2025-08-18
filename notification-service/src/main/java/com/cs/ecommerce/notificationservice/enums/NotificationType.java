@@ -9,5 +9,6 @@ public enum NotificationType {
     ACCOUNT_CREATED,
     PASSWORD_RESET,
     PROMOTION,
-    LOW_STOCK
+    LOW_STOCK,
+    REGISTRATION
 }

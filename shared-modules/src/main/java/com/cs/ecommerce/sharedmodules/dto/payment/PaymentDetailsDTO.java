@@ -1,7 +1,7 @@
-package com.cs.ecommerce.paymentservice.dto;
+package com.cs.ecommerce.sharedmodules.dto.payment;
 
-import com.cs.ecommerce.paymentservice.enums.PaymentMethod;
-import com.cs.ecommerce.paymentservice.enums.PaymentStatus;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentMethod;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

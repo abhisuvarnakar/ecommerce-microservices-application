@@ -1,6 +1,6 @@
 package com.cs.ecommerce.paymentservice.service;
 
-import com.cs.ecommerce.paymentservice.dto.*;
+import com.cs.ecommerce.sharedmodules.dto.payment.*;
 
 import java.util.List;
 

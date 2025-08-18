@@ -1,6 +1,6 @@
 package com.cs.ecommerce.paymentservice.entities;
 
-import com.cs.ecommerce.paymentservice.enums.PaymentStatus;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

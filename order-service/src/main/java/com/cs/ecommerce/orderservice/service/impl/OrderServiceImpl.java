@@ -3,6 +3,7 @@ package com.cs.ecommerce.orderservice.service.impl;
 import com.cs.ecommerce.orderservice.clients.InventoryServiceClient;
 import com.cs.ecommerce.orderservice.clients.PaymentServiceClient;
 import com.cs.ecommerce.orderservice.clients.ProductServiceClient;
+import com.cs.ecommerce.orderservice.clients.UserServiceClient;
 import com.cs.ecommerce.orderservice.dto.*;
 import com.cs.ecommerce.orderservice.entities.Order;
 import com.cs.ecommerce.orderservice.entities.OrderItem;
@@ -22,12 +23,15 @@ import com.cs.ecommerce.sharedmodules.dto.ApiResponse;
 import com.cs.ecommerce.sharedmodules.dto.Pagination;
 import com.cs.ecommerce.sharedmodules.dto.inventory.ReserveStockRequestDTO;
 import com.cs.ecommerce.sharedmodules.dto.inventory.ReserveStockResponseDTO;
+import com.cs.ecommerce.sharedmodules.dto.payment.*;
 import com.cs.ecommerce.sharedmodules.dto.product.ProductDTO;
+import com.cs.ecommerce.sharedmodules.dto.user.UserAddressResponseDTO;
+import com.cs.ecommerce.sharedmodules.dto.user.UserProfileResponseDTO;
 import com.cs.ecommerce.sharedmodules.enums.ApiStatus;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentMethod;
 import com.cs.ecommerce.sharedmodules.exceptions.BusinessException;
 import com.cs.ecommerce.sharedmodules.exceptions.ResourceNotFoundException;
 import com.cs.ecommerce.sharedmodules.exceptions.ServiceException;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -42,15 +46,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -60,6 +62,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductServiceClient productServiceClient;
     private final InventoryServiceClient inventoryServiceClient;
     private final PaymentServiceClient paymentServiceClient;
+    private final UserServiceClient userServiceClient;
     private final OrderValidator orderValidator;
     private final ModelMapper modelMapper;
 
@@ -73,7 +76,6 @@ public class OrderServiceImpl implements OrderService {
         return mapToOrderResponseDTO(order);
     }
 
-    @Transactional
     private Order createAndSaveorder(OrderRequestDTO request, Long userId) {
         log.info("Creating order for user: {}", userId);
         orderValidator.validateOrderRequest(request);
@@ -169,7 +171,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional
     public String cancelOrder(Long userId, Long orderId) {
         log.info("Cancelling order: {} for user: {}", orderId, userId);
         Order order = orderRepository.findByIdAndUserId(orderId, userId)
@@ -194,7 +195,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional
     public String updateOrderStatus(Long orderId, OrderStatus status, String trackingNumber) {
         log.info("Updating order: {} to status: {}", orderId, status);
         Order order = orderRepository.findById(orderId)
@@ -219,6 +219,47 @@ public class OrderServiceImpl implements OrderService {
         // TODO: Notify user
 
         return "Order status updated successfully";
+    }
+
+    @Override
+    public Map<String, Object> getOrderSummary(OrderResponseDTO order, Long userId) {
+        OrderDTO orderDTO = getOrderDetails(order.getOrderId(), userId);
+        ApiResponse<UserProfileResponseDTO> userDTO =
+                userServiceClient.getCurrentUser(userId).getBody();
+        ApiResponse<List<PaymentDetailsDTO>> paymentDTO =
+                paymentServiceClient.getPaymentsForOrder(order.getOrderId());
+
+        UserProfileResponseDTO userProfileResponseDTO = userDTO != null ? userDTO.getData() :
+                new UserProfileResponseDTO();
+        UserAddressResponseDTO userAddressResponseDTO = new UserAddressResponseDTO();
+        List<PaymentDetailsDTO> paymentDetailsDTOList = paymentDTO != null ?
+                paymentDTO.getData() : new ArrayList<>();
+        PaymentDetailsDTO paymentDetailsDTO = new PaymentDetailsDTO();
+
+        for (UserAddressResponseDTO addressResponseDTO : userProfileResponseDTO.getAddresses()) {
+            if (Objects.equals(addressResponseDTO.getId(), orderDTO.getAddressId())) {
+                userAddressResponseDTO = addressResponseDTO;
+                break;
+            }
+        }
+
+        for (PaymentDetailsDTO detailsDTO : paymentDetailsDTOList) {
+            if (Objects.equals(detailsDTO.getOrderId(), orderDTO.getId())) {
+                paymentDetailsDTO = detailsDTO;
+                break;
+            }
+        }
+
+        Map<String, Object> summaryMap = new HashMap<>();
+        summaryMap.put("order", orderDTO);
+        summaryMap.put("userId", userProfileResponseDTO.getUserId());
+        summaryMap.put("email", userProfileResponseDTO.getEmail());
+        summaryMap.put("firstName", userProfileResponseDTO.getFirstName());
+        summaryMap.put("lastName", userProfileResponseDTO.getLastName());
+        summaryMap.put("address", userAddressResponseDTO);
+        summaryMap.put("payment", paymentDetailsDTO);
+
+        return summaryMap;
     }
 
     private List<OrderItem> createOrderItems(Order order, List<CartItemDTO> cartItems,
@@ -272,10 +313,12 @@ public class OrderServiceImpl implements OrderService {
 
     private void processPayment(Long orderId, BigDecimal totalAmount, String paymentMethod,
                                 Long userId) {
-        Map<String, Object> request = Map.of("orderId", orderId,
-                "amount", totalAmount,
-                "paymentMethod", paymentMethod);
-        ApiResponse<Map<String, Object>> response = paymentServiceClient.processPayment(request,
+        PaymentRequestDTO requestDTO = PaymentRequestDTO.builder()
+                .orderId(orderId)
+                .amount(totalAmount)
+                .paymentMethod(PaymentMethod.valueOf(paymentMethod))
+                .build();
+        ApiResponse<PaymentResponseDTO> response = paymentServiceClient.processPayment(requestDTO,
                 userId);
 
         if (!ApiStatus.SUCCESS.equals(response.getStatus())) {
@@ -284,20 +327,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void processRefund(Long orderId, BigDecimal totalAmount, String reason, Long userId) {
-        ApiResponse<List<Map<String, Object>>> paymentResponse =
+        ApiResponse<List<PaymentDetailsDTO>> paymentResponse =
                 paymentServiceClient.getPaymentsForOrder(orderId);
         if (!ApiStatus.SUCCESS.equals(paymentResponse.getStatus())) {
             throw new ResourceNotFoundException("Payment details not found for orderId: " + orderId);
         }
 
-        List<Map<String, Object>> paymentData = paymentResponse.getData();
-        for (Map<String, Object> payment : paymentData) {
-            Long paymentId = ((Number) payment.get("paymentId")).longValue();
-            BigDecimal amount = new BigDecimal(payment.get("amount").toString());
-            Map<String, Object> request = Map.of("amount", amount,
-                    "reason", reason);
-            ApiResponse<Map<String, Object>> response =
-                    paymentServiceClient.processRefund(paymentId, request, userId);
+        List<PaymentDetailsDTO> paymentData = paymentResponse.getData();
+        for (PaymentDetailsDTO payment : paymentData) {
+            Long paymentId = payment.getPaymentId();
+            BigDecimal amount = payment.getAmount();
+            RefundRequestDTO requestDTO = RefundRequestDTO.builder()
+                    .amount(amount)
+                    .reason(reason)
+                    .build();
+            ApiResponse<RefundResponseDTO> response =
+                    paymentServiceClient.processRefund(paymentId, requestDTO, userId);
             if (!ApiStatus.SUCCESS.equals(response.getStatus())) {
                 throw new ServiceException("Refund of payment got failed");
             }

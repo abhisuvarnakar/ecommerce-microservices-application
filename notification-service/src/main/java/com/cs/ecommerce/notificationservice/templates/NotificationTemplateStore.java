@@ -1,25 +1,45 @@
 package com.cs.ecommerce.notificationservice.templates;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.Optional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class NotificationTemplateStore {
 
-    private final Map<String, String> templates = Map.of(
-            "ORDER_CONFIRMATION", "Hello {{name}}, your order {{orderId}} has been confirmed.",
-            "PASSWORD_RESET", "Hi {{name}}, click here to reset your password: {{resetLink}}",
-            "PROMOTION", "Dear {{name}}, check out our latest promotions!"
-    );
-
     public Set<String> getAvailableTemplates() {
-        return templates.keySet();
+        try {
+            Resource[] resources =
+                    ResourcePatternUtils.getResourcePatternResolver(new DefaultResourceLoader())
+                            .getResources("classpath:/templates/email/*.ftl");
+
+            return Arrays.stream(resources)
+                    .map(resource -> {
+                        String filename = resource.getFilename() != null ?
+                                resource.getFilename() : "";
+                        return filename.substring(0, filename.lastIndexOf("."));
+                    })
+                    .collect(Collectors.toSet());
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to list templates", e);
+        }
     }
 
-    public Optional<String> getTemplate(String templateName) {
-        return Optional.ofNullable(templates.get(templateName));
+    public String getTemplateContent(String templateName) throws IOException {
+        Resource resource = new ClassPathResource("/templates/email/" + templateName + ".ftl");
+        try (InputStream inputStream = resource.getInputStream()) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
+
 }

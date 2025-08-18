@@ -1,6 +1,6 @@
 package com.cs.ecommerce.paymentservice.dto;
 
-import com.cs.ecommerce.paymentservice.enums.PaymentMethod;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

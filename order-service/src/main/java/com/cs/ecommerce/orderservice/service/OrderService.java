@@ -3,6 +3,8 @@ package com.cs.ecommerce.orderservice.service;
 import com.cs.ecommerce.orderservice.dto.*;
 import com.cs.ecommerce.orderservice.enums.OrderStatus;
 
+import java.util.Map;
+
 public interface OrderService {
 
     OrderResponseDTO createOrder(OrderRequestDTO request, Long userId);
@@ -17,5 +19,5 @@ public interface OrderService {
 
     String updateOrderStatus(Long orderId, OrderStatus status, String trackingNumber);
 
-
+    Map<String, Object> getOrderSummary(OrderResponseDTO order, Long userId);
 }

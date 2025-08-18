@@ -89,6 +89,13 @@
         </dependencies>
     </dependencyManagement>
 
+    <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/abhisuvarnakar/shared-library-ecommerce</url>
+        </repository>
+    </repositories>
+    
     <build>
         <plugins>
             <plugin>

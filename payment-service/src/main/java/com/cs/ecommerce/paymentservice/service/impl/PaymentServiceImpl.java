@@ -1,10 +1,10 @@
 package com.cs.ecommerce.paymentservice.service.impl;
 
-import com.cs.ecommerce.paymentservice.dto.*;
 import com.cs.ecommerce.paymentservice.entities.Payment;
 import com.cs.ecommerce.paymentservice.entities.Refund;
 import com.cs.ecommerce.paymentservice.entities.UserPaymentMethod;
-import com.cs.ecommerce.paymentservice.enums.PaymentStatus;
+import com.cs.ecommerce.sharedmodules.dto.payment.*;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentStatus;
 import com.cs.ecommerce.paymentservice.exceptions.PaymentNotFoundException;
 import com.cs.ecommerce.paymentservice.exceptions.PaymentProcessingException;
 import com.cs.ecommerce.paymentservice.repositories.PaymentRepository;
@@ -38,7 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentResponseDTO processPayment(PaymentRequestDTO paymentRequest, Long userId) {
-        paymentValidator.validateOrder(paymentRequest.getOrderId(), userId);
+        //paymentValidator.validateOrder(paymentRequest.getOrderId(), userId);
         List<UserPaymentMethod> userPaymentMethods =
                 userPaymentMethodRepository.findByUserId(userId);
         if (userPaymentMethods.isEmpty()) {

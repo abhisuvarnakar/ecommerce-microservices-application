@@ -1,7 +1,7 @@
 package com.cs.ecommerce.paymentservice.service.impl;
 
-import com.cs.ecommerce.paymentservice.dto.PaymentRequestDTO;
-import com.cs.ecommerce.paymentservice.dto.RefundRequestDTO;
+import com.cs.ecommerce.sharedmodules.dto.payment.PaymentRequestDTO;
+import com.cs.ecommerce.sharedmodules.dto.payment.RefundRequestDTO;
 import com.cs.ecommerce.paymentservice.entities.Payment;
 import com.cs.ecommerce.paymentservice.exceptions.PaymentProcessingException;
 import com.cs.ecommerce.paymentservice.service.PaymentGatewayService;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 

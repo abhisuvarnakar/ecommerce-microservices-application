@@ -1,6 +1,5 @@
 package com.cs.ecommerce.notificationservice.controller;
 
-import com.cs.ecommerce.notificationservice.dto.EmailNotificationRequestDTO;
 import com.cs.ecommerce.notificationservice.dto.EmailNotificationResponseDTO;
 import com.cs.ecommerce.notificationservice.dto.NotificationResponseDTO;
 import com.cs.ecommerce.notificationservice.enums.NotificationStatus;
@@ -8,6 +7,7 @@ import com.cs.ecommerce.notificationservice.enums.NotificationType;
 import com.cs.ecommerce.notificationservice.service.NotificationService;
 import com.cs.ecommerce.sharedmodules.dto.ApiResponse;
 import com.cs.ecommerce.sharedmodules.dto.MessageResponse;
+import com.cs.ecommerce.sharedmodules.dto.email.EmailNotificationRequestDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

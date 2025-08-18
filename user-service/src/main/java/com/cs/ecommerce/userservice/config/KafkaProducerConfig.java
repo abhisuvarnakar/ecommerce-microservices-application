@@ -1,14 +1,9 @@
-package com.cs.ecommerce.orderservice.config;
+package com.cs.ecommerce.userservice.config;
 
 import com.cs.ecommerce.sharedmodules.dto.email.EmailNotificationRequestDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import feign.codec.ErrorDecoder;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,29 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class AppConfig {
+public class KafkaProducerConfig {
 
-    @Bean
-    public ModelMapper modelMapper() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration()
-                .setMatchingStrategy(MatchingStrategies.STRICT)
-                .setSkipNullEnabled(true);
-        return mapper;
-    }
-
-    @Bean
-    public ErrorDecoder errorDecoder() {
-        return new CustomFeignErrorDecoder();
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return mapper;
-    }
+    @Value("${kafka.topic.email-out}")
+    private String EMAIL_OUT_TOPIC;
 
     @Bean
     public ProducerFactory<String, EmailNotificationRequestDTO> producerFactory() {
@@ -51,12 +27,16 @@ public class AppConfig {
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configProps, new StringSerializer(),
-                new JsonSerializer<>(objectMapper()));
+        return new DefaultKafkaProducerFactory<>(configProps);
     }
 
     @Bean
     public KafkaTemplate<String, EmailNotificationRequestDTO> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean
+    public NewTopic emailTopic() {
+        return new NewTopic(EMAIL_OUT_TOPIC, 3, (short) 1);
     }
 }

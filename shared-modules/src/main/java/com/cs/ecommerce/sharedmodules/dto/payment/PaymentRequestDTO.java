@@ -1,9 +1,8 @@
-package com.cs.ecommerce.paymentservice.dto;
+package com.cs.ecommerce.sharedmodules.dto.payment;
 
-import jakarta.validation.constraints.NotBlank;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentMethod;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,13 +14,16 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RefundRequestDTO {
+public class PaymentRequestDTO {
+
+    @NotNull(message = "Order ID is required")
+    private Long orderId;
 
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be positive")
     private BigDecimal amount;
 
-    @NotBlank(message = "Reason is required")
-    @Size(max = 255, message = "Reason must be less than 255 characters")
-    private String reason;
+    @NotNull(message = "Payment method is required")
+    private PaymentMethod paymentMethod;
+
 }

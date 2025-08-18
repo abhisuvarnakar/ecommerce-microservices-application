@@ -2,13 +2,17 @@ package com.cs.ecommerce.orderservice.controller;
 
 import com.cs.ecommerce.orderservice.dto.*;
 import com.cs.ecommerce.orderservice.enums.OrderStatus;
+import com.cs.ecommerce.orderservice.producer.EmailProducer;
 import com.cs.ecommerce.orderservice.service.OrderService;
 import com.cs.ecommerce.sharedmodules.dto.ApiResponse;
+import com.cs.ecommerce.sharedmodules.dto.email.EmailNotificationRequestDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final EmailProducer emailProducer;
 
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponseDTO>> createOrder(
@@ -24,6 +29,15 @@ public class OrderController {
             @Valid @RequestBody OrderRequestDTO request) {
         log.debug("Received request to create order for user: {}", userId);
         OrderResponseDTO order = orderService.createOrder(request, userId);
+
+        Map<String, Object> orderSummaryMap = orderService.getOrderSummary(order, userId);
+        EmailNotificationRequestDTO  emailNotificationRequestDTO = EmailNotificationRequestDTO.builder()
+                .to((String) orderSummaryMap.get("email"))
+                .subject("Order Confirmation: " + ((OrderDTO) orderSummaryMap.get("order")).getOrderNumber())
+                .template("ORDER_CONFIRMATION")
+                .data(orderSummaryMap).build();
+        emailProducer.sendEmailEvent(emailNotificationRequestDTO);
+
         return ResponseEntity.ok(ApiResponse.success(order, "Order created successfully"));
     }
 

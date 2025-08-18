@@ -1,16 +1,14 @@
 package com.cs.ecommerce.paymentservice.entities;
 
-import com.cs.ecommerce.paymentservice.enums.PaymentMethod;
-import com.cs.ecommerce.paymentservice.enums.PaymentStatus;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentMethod;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
 
 import java.math.BigDecimal;
-import java.sql.Types;
 import java.time.LocalDateTime;
 
 @Entity

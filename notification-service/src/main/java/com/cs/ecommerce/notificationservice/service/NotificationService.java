@@ -1,11 +1,11 @@
 package com.cs.ecommerce.notificationservice.service;
 
-import com.cs.ecommerce.notificationservice.dto.EmailNotificationRequestDTO;
 import com.cs.ecommerce.notificationservice.dto.EmailNotificationResponseDTO;
 import com.cs.ecommerce.notificationservice.dto.NotificationResponseDTO;
 import com.cs.ecommerce.notificationservice.entities.Notification;
 import com.cs.ecommerce.notificationservice.enums.NotificationType;
 import com.cs.ecommerce.sharedmodules.dto.MessageResponse;
+import com.cs.ecommerce.sharedmodules.dto.email.EmailNotificationRequestDTO;
 
 import java.util.Map;
 import java.util.Set;

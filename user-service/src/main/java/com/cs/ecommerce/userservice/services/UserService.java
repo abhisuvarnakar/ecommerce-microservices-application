@@ -2,8 +2,8 @@ package com.cs.ecommerce.userservice.services;
 
 import com.cs.ecommerce.userservice.dto.UpdateUserRequestDTO;
 import com.cs.ecommerce.userservice.dto.UserAddressRequestDTO;
-import com.cs.ecommerce.userservice.dto.UserAddressResponseDTO;
-import com.cs.ecommerce.userservice.dto.UserProfileResponseDTO;
+import com.cs.ecommerce.sharedmodules.dto.user.UserAddressResponseDTO;
+import com.cs.ecommerce.sharedmodules.dto.user.UserProfileResponseDTO;
 import com.cs.ecommerce.userservice.entities.User;
 
 import java.util.List;

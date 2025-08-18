@@ -1,18 +1,19 @@
 package com.cs.ecommerce.notificationservice.service.impl;
 
-import com.cs.ecommerce.notificationservice.dto.EmailNotificationRequestDTO;
 import com.cs.ecommerce.notificationservice.dto.EmailNotificationResponseDTO;
 import com.cs.ecommerce.notificationservice.dto.NotificationDTO;
 import com.cs.ecommerce.notificationservice.dto.NotificationResponseDTO;
 import com.cs.ecommerce.notificationservice.entities.Notification;
 import com.cs.ecommerce.notificationservice.enums.NotificationStatus;
 import com.cs.ecommerce.notificationservice.enums.NotificationType;
+import com.cs.ecommerce.notificationservice.processor.TemplateProcessor;
 import com.cs.ecommerce.notificationservice.repository.NotificationRepository;
 import com.cs.ecommerce.notificationservice.service.EmailSenderService;
 import com.cs.ecommerce.notificationservice.service.NotificationService;
 import com.cs.ecommerce.notificationservice.templates.NotificationTemplateStore;
 import com.cs.ecommerce.sharedmodules.dto.MessageResponse;
 import com.cs.ecommerce.sharedmodules.dto.Pagination;
+import com.cs.ecommerce.sharedmodules.dto.email.EmailNotificationRequestDTO;
 import com.cs.ecommerce.sharedmodules.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,13 +39,17 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationTemplateStore templateStore;
     private final EmailSenderService emailSenderService;
     private final ModelMapper modelMapper;
+    private final TemplateProcessor templateProcessor;
 
     @Override
     public EmailNotificationResponseDTO sendEmailNotification(Long userId,
                                                               EmailNotificationRequestDTO req) {
-        String templateText =
-                templateStore.getTemplate(req.getTemplate()).orElseThrow(() -> new ResourceNotFoundException("Template not found: " + req.getTemplate()));
-        String processedMessage = processTemplate(templateText, req.getData());
+        String processedMessage;
+        try {
+            processedMessage = templateProcessor.processTemplate(req.getTemplate(), req.getData());
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("Template processing failed: " + req.getTemplate() + e.getMessage());
+        }
 
         Notification notification = Notification.builder()
                 .userId(userId)
@@ -96,7 +101,8 @@ public class NotificationServiceImpl implements NotificationService {
                                                         NotificationType type, Boolean read) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Notification> pageResult = notificationRepository.findByUserIdAndFilters(userId, type, read, pageable);
+        Page<Notification> pageResult = notificationRepository.findByUserIdAndFilters(userId,
+                type, read, pageable);
 
         List<NotificationDTO> notifications = pageResult.stream()
                 .map(notification -> modelMapper.map(notification, NotificationDTO.class))

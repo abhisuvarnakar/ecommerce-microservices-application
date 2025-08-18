@@ -1,4 +1,4 @@
-package com.cs.ecommerce.userservice.dto;
+package com.cs.ecommerce.sharedmodules.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +15,6 @@ public class UserProfileResponseDTO {
     private String email;
     private String firstName;
     private String lastName;
-    private String phone;
     private List<UserAddressResponseDTO> addresses;
 
 }

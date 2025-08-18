@@ -1,6 +1,6 @@
 package com.cs.ecommerce.paymentservice.dto;
 
-import com.cs.ecommerce.paymentservice.enums.PaymentMethod;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

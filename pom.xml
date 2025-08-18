@@ -12,7 +12,6 @@
     <description>Parent POM for ECommerce Microservices</description>
 
     <modules>
-        <module>shared-modules</module>
         <module>user-service</module>
         <module>product-service</module>
         <module>inventory-service</module>

@@ -1,7 +1,7 @@
 package com.cs.ecommerce.paymentservice.service;
 
-import com.cs.ecommerce.paymentservice.dto.PaymentRequestDTO;
-import com.cs.ecommerce.paymentservice.dto.RefundRequestDTO;
+import com.cs.ecommerce.sharedmodules.dto.payment.PaymentRequestDTO;
+import com.cs.ecommerce.sharedmodules.dto.payment.RefundRequestDTO;
 import com.cs.ecommerce.paymentservice.entities.Payment;
 import lombok.AllArgsConstructor;
 import lombok.Data;

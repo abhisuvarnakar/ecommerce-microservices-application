@@ -1,4 +1,4 @@
-package com.cs.ecommerce.paymentservice.enums;
+package com.cs.ecommerce.sharedmodules.enums.payment;
 
 public enum PaymentStatus {
     PENDING,

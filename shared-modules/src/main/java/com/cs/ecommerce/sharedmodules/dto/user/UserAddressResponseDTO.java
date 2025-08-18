@@ -1,4 +1,4 @@
-package com.cs.ecommerce.userservice.dto;
+package com.cs.ecommerce.sharedmodules.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

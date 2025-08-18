@@ -1,6 +1,6 @@
-package com.cs.ecommerce.paymentservice.dto;
+package com.cs.ecommerce.sharedmodules.dto.payment;
 
-import com.cs.ecommerce.paymentservice.enums.PaymentStatus;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +10,10 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class PaymentResponseDTO {
-    private Long paymentId;
+@NoArgsConstructor
+public class RefundResponseDTO {
+    private Long refundId;
     private PaymentStatus status;
-    private String transactionId;
     private LocalDateTime timestamp;
 }

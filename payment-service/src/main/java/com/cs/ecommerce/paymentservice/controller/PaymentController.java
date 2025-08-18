@@ -1,8 +1,8 @@
 package com.cs.ecommerce.paymentservice.controller;
 
-import com.cs.ecommerce.paymentservice.dto.*;
 import com.cs.ecommerce.paymentservice.service.PaymentService;
 import com.cs.ecommerce.sharedmodules.dto.ApiResponse;
+import com.cs.ecommerce.sharedmodules.dto.payment.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -2,15 +2,12 @@ package com.cs.ecommerce.paymentservice.validator;
 
 import com.cs.ecommerce.paymentservice.clients.OrderServiceClient;
 import com.cs.ecommerce.paymentservice.dto.PaymentMethodRequestDTO;
-import com.cs.ecommerce.paymentservice.dto.PaymentRequestDTO;
-import com.cs.ecommerce.paymentservice.dto.RefundRequestDTO;
+import com.cs.ecommerce.sharedmodules.dto.payment.RefundRequestDTO;
 import com.cs.ecommerce.paymentservice.entities.Payment;
-import com.cs.ecommerce.paymentservice.enums.PaymentMethod;
-import com.cs.ecommerce.paymentservice.enums.PaymentStatus;
+import com.cs.ecommerce.sharedmodules.enums.payment.PaymentStatus;
 import com.cs.ecommerce.paymentservice.exceptions.PaymentProcessingException;
 import com.cs.ecommerce.paymentservice.exceptions.RefundProcessingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

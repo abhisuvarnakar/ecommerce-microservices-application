@@ -27,7 +27,7 @@ public interface InventoryServiceClient {
             @RequestBody List<ReserveStockRequestDTO> requests);
 
     @PostMapping("/api/release/order/{orderId}")
-    public ResponseEntity<ApiResponse<String>> releaseStockFromOrder(
+    ResponseEntity<ApiResponse<String>> releaseStockFromOrder(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable("orderId") Long orderId);
 
